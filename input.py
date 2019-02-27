@@ -1,6 +1,7 @@
 import json
 from collections import namedtuple
 from block import Block
+from state import State
 
 def read_input():
   input_file = open("input.json", "r")
@@ -15,8 +16,8 @@ def read_input():
   start_state = read_state(parsed.start)
   end_state = read_state(parsed.end)
 
-  start_keys = set(start_state.keys())
-  end_keys = set(end_state.keys())
+  start_keys = set(start_state.state.keys())
+  end_keys = set(end_state.state.keys())
 
   if len(start_keys | end_keys) != len(start_keys):
     raise ValueError("the blocks used at start is different from the ones at end")
@@ -86,4 +87,4 @@ def read_state(state_obj):
       block = Block(col, up, below)
       state[col] = block
 
-  return state
+  return State(state)

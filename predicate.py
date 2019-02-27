@@ -1,12 +1,12 @@
+from stack_node import StackNode
 import action
 
-class Predicate(object):
+class Predicate(StackNode):
 	name = ""
 	args = None
 
 	def __init__(self, name, args):
-		self.name = name
-		self.args = args
+		StackNode.__init__(self, "predicate", name, args)
 
 	def check(self, current, arm):
 		# maximum 2 args
@@ -73,7 +73,7 @@ class Predicate(object):
 			# arm is empty
 			return action.Action('putdown', (arm,))
 
-		return None
+		return []
 
 	def __repr__(self):
 		params = ', '.join(map(str, self.args))

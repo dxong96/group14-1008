@@ -1,12 +1,9 @@
+from stack_node import StackNode
 import predicate
 
-class Action(object):
-	name = ""
-	args = None
-
+class Action(StackNode):
 	def __init__(self, name, args):
-		self.name = name
-		self.args = args
+		StackNode.__init__(self, "action", name, args)
 
 	def perform(self, current):
 		# maximum 2 args
