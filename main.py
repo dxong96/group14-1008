@@ -6,16 +6,24 @@ from input import read_input
 
 current, goal = read_input()
 
+"""
+Solve the steps for start to end using goal stack planning
+"""
 def goal_stack_planning():
   predicate_stack = []
   steps = []
   # convert goals to predicates
   predicate_stack.extend(goal.predicates())
 
+  print "Starting state:"
   current.printState()
+  print "====================="
 
   while len(predicate_stack) > 0:
-    # print predicate_stack, "arm: ", arm
+    # current.printState()
+    # print "stack: ", predicate_stack
+    # print "arm: ", current.arm
+    # print "steps:", steps
     top = predicate_stack[-1]
     # print type(top)
     if type(top) is Predicate:
@@ -33,7 +41,11 @@ def goal_stack_planning():
       current.arm = top.perform(current.state)
       predicate_stack.pop()
       steps.append(str(top))
+      print "Action performed: %s" % str(top)
+      print "State:"
       current.printState()
+      print "Arm: %s" % current.arm
+      print "====================="
     elif type(top) is list:
       # conjuction predicate
       # why we need this?
