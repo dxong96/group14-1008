@@ -1,3 +1,5 @@
+import input
+
 class State(object):
   """Contains the state for the blocks"""
   def __init__(self, state):
@@ -54,3 +56,9 @@ class State(object):
 
     field.reverse()
     return tuple(map(tuple, field))
+
+
+  def clone(self):
+    new_state = input.read_state(self.dump())
+    new_state.arm = self.arm
+    return new_state
