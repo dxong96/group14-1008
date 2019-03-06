@@ -2,14 +2,17 @@ from block import Block
 from predicate import Predicate
 from action import Action
 from input import read_input
+from bfs import breath_first_search
 
 
-current, goal = read_input()
+start, goal = read_input()
 
 """
 Solve the steps for start to end using goal stack planning
 """
 def goal_stack_planning():
+  # we clone because it might be used later on
+  current = start.clone()
   predicate_stack = []
   steps = []
   # convert goals to predicates
@@ -63,4 +66,12 @@ def goal_stack_planning():
 
   print steps
 
-goal_stack_planning()
+# goal_stack_planning()
+
+
+
+result = breath_first_search(start, goal)
+if result == None:
+  print 'no result'
+else:
+  print result

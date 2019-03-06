@@ -1,4 +1,5 @@
 import input
+from block import Block
 
 class State(object):
   """Contains the state for the blocks"""
@@ -25,15 +26,15 @@ class State(object):
     predicates.insert(0, predicates[:])
     return predicates
 
-  def dump(self):
+  def dump(self, blank=' '):
     # find the width
-    width = 0
     table_blocks = []
     for b in self.state.values():
       if b.ontable():
-        width += 1
         table_blocks.append(b)
 
+    width = len(table_blocks)
+    
     # initialize list with size with to 1
     heights = [1 for i in range(width)]
 
@@ -45,7 +46,7 @@ class State(object):
         b = b.up
 
     max_height = max(heights)
-    field = [[' ' for x in range(width)] for y in range(max_height)]
+    field = [[blank for x in range(width)] for y in range(max_height)]
     for x in range(len(table_blocks)):
       b = table_blocks[x]
       y = 0
@@ -59,6 +60,21 @@ class State(object):
 
 
   def clone(self):
-    new_state = input.read_state(self.dump())
+    new_state = input.read_state(self.dump(None))
     new_state.arm = self.arm
+    if self.arm != None:
+      b = Block(self.arm, None, None)
+      b.held = True
+      new_state.state[self.arm] = b
+
     return new_state
+
+  def __eq__(self, other):
+    """Overrides the default implementation"""
+    if isinstance(other, State):
+        return self.arm == other.arm and self.dump() == other.dump()
+    return False
+
+  def __ne__(self, other):
+    """Overrides the default implementation (unnecessary in Python 3)"""
+    return not self.__eq__(other)
