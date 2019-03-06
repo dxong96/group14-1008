@@ -21,7 +21,7 @@ class Block:
 		return self.below.value == block.value
 
 	def clear(self):
-		return self.up == None
+		return self.up == None and not self.held
 
 
 	def predicates(self):
