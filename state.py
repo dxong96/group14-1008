@@ -2,11 +2,15 @@ import input
 from block import Block
 
 class State(object):
+  limit = -1
   """Contains the state for the blocks"""
   def __init__(self, state):
     super(State, self).__init__()
     self.state = state
     self.arm = None
+
+  def onTableBlocks(self):
+    return filter(Block.ontable, self.state.values())
     
   """
   Print the state
@@ -62,6 +66,7 @@ class State(object):
   def clone(self):
     new_state = input.read_state(self.dump(None))
     new_state.arm = self.arm
+    new_state.limit = self.limit
     if self.arm != None:
       b = Block(self.arm, None, None)
       b.held = True

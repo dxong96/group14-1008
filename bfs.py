@@ -42,8 +42,11 @@ def get_sucessors(current_state):
       else:
         actions.append(Action("unstack", (b.value, b.below.value)))
   else:
+    tableBlocksLength = len(current_state.onTableBlocks())
     # stack, putdown
-    actions.append(Action("putdown", (current_state.arm,)))
+    if current_state.limit == -1 or tableBlocksLength < current_state.limit:
+      actions.append(Action("putdown", (current_state.arm,)))
+
     for b in clear_blocks:
       actions.append(Action("stack", (current_state.arm, b.value)))
 
@@ -52,10 +55,10 @@ def get_sucessors(current_state):
   for action in actions:
     s = current_state.clone()
     s.arm = action.perform(s.state)
-    s.printState()
-    print "action performed", action
-    print "arm: ", s.arm
-    print "====next===="
+    # s.printState()
+    # print "action performed", action
+    # print "arm: ", s.arm
+    # print "====next===="
 
     result.append((s, action))
 

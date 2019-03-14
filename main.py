@@ -41,10 +41,46 @@ def goal_stack_planning():
         predicate_stack.extend(preconds)
     elif type(top) is Action:
       # action
-      current.arm = top.perform(current.state)
-      predicate_stack.pop()
-      steps.append(str(top))
-      print "Action performed: %s" % str(top)
+      ontable_blocks = current.onTableBlocks()
+      if current.limit == -1 or len(ontable_blocks) < current.limit:
+        # unlimited spaces or limit not reached
+        current.arm = top.perform(current.state)
+        predicate_stack.pop()
+        steps.append(top)
+        print "Action performed: %s" % str(top)
+      else:
+        # limited space
+        if top.name == 'putdown':
+          # action is putdown
+          # check the last stack step
+          # it cannot be a pickup step as picking up will leave a empty space
+          previous_action = steps[-1]
+          from_block = previous_action.args[1]
+          # get top blocks that is not the from block
+          top_blocks = filter(Block.clear, current.state.values())
+          for i in range(len(top_blocks)):
+            if top_blocks[i].value == from_block:
+              del top_blocks[i]
+              break
+
+          # try to stack on top blocks and check if action will be undone
+          for b in top_blocks:
+            stack_action = Action('stack', (top.args[0], b.value))
+            next_action = calculate_next_action(current, predicate_stack, stack_action)
+            unstack_action = Action('unstack', stack_action.args)
+            if next_action != unstack_action:
+              current.arm = stack_action.perform(current.state)
+              predicate_stack.pop()
+              steps.append(stack_action)
+              print "Action performed: %s" % str(stack_action)
+              break
+        else:
+          current.arm = top.perform(current.state)
+          predicate_stack.pop()
+          steps.append(top)
+          print "Action performed: %s" % str(top)
+
+
       print "State:"
       current.printState()
       print "Arm: %s" % current.arm
@@ -63,8 +99,56 @@ def goal_stack_planning():
       if statisfy:
         predicate_stack.pop()
     # raw_input()
+  # print steps
+  print cleanup_steps(steps)
+  print "Total number steps:", len(steps)
 
-  print steps
+def calculate_next_action(state, predicate_stack, action):
+  state = state.clone()
+  predicate_stack = predicate_stack[:-1]
+  print 'calculating next action, start predicate: ', predicate_stack
+  state.arm = action.perform(state.state)
+  while len(predicate_stack) > 0:
+    top = predicate_stack[-1]
+    if type(top) is Predicate:
+      statisfy = top.check(state.state, state.arm)
+      if statisfy:
+        predicate_stack.pop()
+      else:
+        correction = top.correction(state.state, state.arm)
+        preconds = correction.preconditions(state.state)
+        predicate_stack.append(correction)
+        predicate_stack.extend(preconds)
+    elif type(top) is Action:
+      print 'next action: ', top
+      return top
+    elif type(top) is list:
+      statisfy = True
+      for predicate in top:
+        if not predicate.check(state.state, state.arm):
+          predicate_stack.append(predicate)
+          statisfy = False
+
+      if statisfy:
+        predicate_stack.pop()
+    # raw_input()
+  return None
+
+def cleanup_steps(steps):
+  i = 0
+  size = len(steps)
+  while i < size - 1:
+    current_step = steps[i]
+    opposite_step = current_step.undoing_action()
+    next_step = steps[i + 1]
+    if opposite_step == next_step:
+      del steps[i:i+2]
+      size -= 2
+      i -= 1
+      continue
+    i += 1
+  return steps
+
 
 # goal_stack_planning()
 
